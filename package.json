@@ -1,0 +1,18 @@
+{
+  "author": "Francisco Tavares de Lima Neto",
+  "description": "Callbag operator that rescues a failed source",
+  "devDependencies": {
+    "tape": "~4.9.0",
+    "callbag-from-iter": "~1.0.0"
+  },
+  "keywords": [
+    "callbag"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "callbag-rescue",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "version": "1.0.0"
+}
