@@ -1,5 +1,11 @@
 const test = require('tape');
+
+const flatten = require('callbag-flatten');
 const fromIter = require('callbag-from-iter');
+const map = require('callbag-map');
+const pipe = require('callbag-pipe');
+const throwError = require('callbag-throw-error');
+
 const rescue = require('./index');
 
 const TYPES = {
@@ -12,7 +18,7 @@ const TYPES = {
 const rescuer = err => fromIter([{ type: 'ERROR', payload: err }]);
 
 test('it rescues a pullable source', function (t) {
-  t.plan(22);
+  t.plan(20);
   const upwardsExpected = [
     [0, TYPES.FUNCTION],
     [1, TYPES.UNDEFINED],
@@ -21,7 +27,6 @@ test('it rescues a pullable source', function (t) {
   const downwardsExpectedType = [
     [0, TYPES.FUNCTION],
     [1, TYPES.NUMBER],
-    [0, TYPES.FUNCTION],
     [1, TYPES.OBJECT],
     [2, TYPES.UNDEFINED],
   ];
@@ -86,7 +91,7 @@ test('it rescues a pullable source', function (t) {
 });
 
 test('it rescues an async finite listenable source', function (t) {
-  t.plan(15);
+  t.plan(13);
   const upwardsExpected = [
     [0, TYPES.FUNCTION],
     [1, TYPES.UNDEFINED],
@@ -94,7 +99,6 @@ test('it rescues an async finite listenable source', function (t) {
   const downwardsExpectedType = [
     [0, TYPES.FUNCTION],
     [1, TYPES.NUMBER],
-    [0, TYPES.FUNCTION],
     [1, TYPES.OBJECT],
   ];
   const ERROR = 'Error Thrown';
@@ -205,6 +209,49 @@ test('it returns a source that disposes upon upwards END (2)', function (t) {
 
   setTimeout(function () {
     t.pass('nothing else happens');
+    t.end();
+  }, 700);
+});
+
+test('it greets the sink only once', function(t) {
+  t.plan(13);
+  const downwardsExpectedType = [
+    [0, TYPES.FUNCTION],
+    [1, TYPES.NUMBER],
+    [1, TYPES.NUMBER],
+    [1, TYPES.NUMBER],
+    [1, TYPES.NUMBER],
+    [2, TYPES.UNDEFINED],
+  ];
+  const downwardsExpected = [1, 4, 5, 6, undefined];
+
+  const makeSink = operation => source => {
+    let talkback;
+    source(0, (type, data) => {
+      const et = downwardsExpectedType.shift();
+      t.equals(type, et[0], "downwards type is expected: " + et[0]);
+      t.equals(typeof data, et[1], "downwards data type is expected: " + et[1]);
+
+      if (type === 0) talkback = data;
+      if (type === 1 || type === 0) talkback(1);
+    });
+  };
+
+  pipe(
+    fromIter([1, 2, 3]),
+    map(v => {
+      if (v < 2) {
+        return fromIter([v]);
+      }
+      return throwError("err");
+    }),
+    flatten,
+    rescue(() => fromIter([4, 5, 6])),
+    makeSink()
+  );
+
+  setTimeout(function() {
+    t.pass("nothing else happens");
     t.end();
   }, 700);
 });
