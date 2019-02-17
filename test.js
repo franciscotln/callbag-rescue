@@ -6,7 +6,7 @@ const map = require('callbag-map');
 const pipe = require('callbag-pipe');
 const throwError = require('callbag-throw-error');
 
-const rescue = require('./index');
+const rescue = require('.');
 
 const TYPES = {
   FUNCTION: 'function',

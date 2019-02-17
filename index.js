@@ -27,7 +27,7 @@ const rescue = f => source => (start, sink) => {
       return;
     }
 
-    if (t !== 2 || !d || rescued) {
+    if (t !== 2 || d == null || rescued) {
       sink(t, d);
       return;
     }
