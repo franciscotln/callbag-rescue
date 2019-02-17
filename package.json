@@ -3,8 +3,12 @@
   "description": "Callbag operator that rescues a failed source",
   "dependencies": {},
   "devDependencies": {
-    "tape": "~4.9.0",
-    "callbag-from-iter": "~1.0.0"
+    "callbag-flatten": "^1.2.0",
+    "callbag-from-iter": "^1.0.0",
+    "callbag-map": "^1.0.1",
+    "callbag-pipe": "^1.1.1",
+    "callbag-throw-error": "^1.0.1",
+    "tape": "~4.9.0"
   },
   "keywords": [
     "callbag"

@@ -5,18 +5,44 @@
  */
 
 const rescue = f => source => (start, sink) => {
-  start === 0 && source(start, (t, d) => {
-    if (t === 2 && d != null) {
-      try {
-        const newSource = f(d);
-        newSource(start, sink);
-      } catch (e) {
-        sink(2, e);
+  if (start !== 0) return;
+
+  let rescued = false;
+  let sourceTalkback;
+
+  const talkback = (t, d) => {
+    sourceTalkback(t, d);
+  }
+
+  const innerSink = (t, d) => {
+    if (t === 0) {
+      sourceTalkback = d;
+
+      if (rescued) {
+        talkback(1);
+        return;
       }
-    } else {
-      sink(t, d);
+
+      sink(t, talkback);
+      return;
     }
-  });
+
+    if (t !== 2 || !d || rescued) {
+      sink(t, d);
+      return;
+    }
+
+    rescued = true;
+
+    try {
+      const newSource = f(d);
+      newSource(0, innerSink);
+    } catch (e) {
+      sink(2, e);
+    }
+  };
+
+  source(start, innerSink);
 };
 
 module.exports = rescue;
